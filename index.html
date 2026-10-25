@@ -1,0 +1,228 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>ARPCS Circuit</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=DM+Mono:wght@400;500&family=Outfit:wght@400;500;600&display=swap">
+<style>
+:root{--bg:#e8eee6;--panel:#f6f9f4;--ink:#1c2a20;--muted:#5b6a5f;--line:#c9d6ca;--accent:#2d8a4b;--ai:#fff;--red:#c8372d;--amb:#d99a00;--wire:#1c2a20;--s1:#f1f7f1;--s2:#c4d6c7;--f:"Outfit","Segoe UI",sans-serif;--m:"DM Mono",ui-monospace,Menlo,monospace;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#101712;--panel:#19231c;--ink:#e6efe7;--muted:#9fb0a3;--line:#2d3d32;--accent:#5fd68a;--ai:#0e1a12;--red:#ff6a5c;--amb:#f0b429;--wire:#e6efe7;--s1:#223028;--s2:#121a15;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#101712;--panel:#19231c;--ink:#e6efe7;--muted:#9fb0a3;--line:#2d3d32;--accent:#5fd68a;--ai:#0e1a12;--red:#ff6a5c;--amb:#f0b429;--wire:#e6efe7;--s1:#223028;--s2:#121a15;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}[hidden]{display:none!important}
+body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.45 var(--f);padding:20px max(16px,env(safe-area-inset-right)) 28px max(16px,env(safe-area-inset-left))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;gap:16px;grid-template-columns:minmax(0,1.6fr) minmax(0,1fr);align-items:start}
+header{grid-column:1/-1}h1{margin:0;font-size:28px;font-weight:600;letter-spacing:-.01em}.sub{margin:4px 0 0;color:var(--muted)}
+h2{font-size:15px;font-weight:600;margin:0 0 8px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:14px}
+.st,.ct{display:grid;gap:12px;min-width:0}.ct{gap:16px}
+.bar2{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+.stage{position:relative;aspect-ratio:4/3;min-height:320px;border:1px solid var(--line);border-radius:10px;overflow:hidden;background:radial-gradient(120% 100% at 50% 0,var(--s1),var(--s2))}
+#v3,#v2{position:absolute;inset:0}#v3 canvas{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#v2 svg{width:100%;height:100%;display:block}
+.hint{position:absolute;left:10px;bottom:8px;font-size:12px;color:var(--muted);pointer-events:none}
+.info{min-height:64px}.info p{margin:2px 0 0;color:var(--muted)}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:8px;overflow:hidden;background:var(--panel)}
+.seg button{border:0;background:transparent;color:var(--ink);font:500 13px var(--f);padding:8px 18px;cursor:pointer;min-height:36px}
+.seg button[aria-pressed=true]{background:var(--accent);color:var(--ai)}
+.btn{font:500 13px var(--f);color:var(--ink);background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:7px 12px;cursor:pointer;min-height:34px}
+.btn:hover{border-color:var(--accent)}:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.sw{display:flex;align-items:center;gap:10px;padding:8px 0;cursor:pointer;border-top:1px solid var(--line)}.sw:first-of-type{border-top:0}
+.sw input{position:absolute;opacity:0;width:1px;height:1px}
+.tr{flex:none;width:40px;height:22px;border-radius:11px;background:var(--line);position:relative;transition:background .15s}
+.tr::after{content:"";position:absolute;left:3px;top:3px;width:16px;height:16px;border-radius:50%;background:var(--panel);box-shadow:0 1px 2px rgba(0,0,0,.35);transition:transform .15s}
+.sw input:checked+.tr{background:var(--accent)}.sw input:checked+.tr::after{transform:translateX(18px)}
+.sw input:focus-visible+.tr{outline:2px solid var(--accent);outline-offset:2px}
+.sw .n{flex:1}.sw small{display:block;color:var(--muted);font-size:12px}
+.sl label{display:flex;justify-content:space-between;font-weight:500}.sl output{font-family:var(--m)}
+input[type=range]{width:100%;accent-color:var(--accent);margin:6px 0 0}
+.rd{display:grid;grid-template-columns:1fr auto;gap:6px 10px;font-size:13px}.rd b{font:500 13px var(--m);text-align:right}
+.on{color:var(--accent)}.off{color:var(--muted)}.al{color:var(--red)}
+.lgd{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:1fr 1fr;gap:4px 10px}
+.lgd button{display:flex;gap:8px;align-items:center;width:100%;text-align:left;border:0;background:transparent;color:var(--ink);font:13px var(--f);padding:3px 0;cursor:pointer}
+.lgd i{flex:none;width:20px;height:20px;border-radius:50%;background:var(--accent);color:var(--ai);font:600 11px/20px var(--f);text-align:center;font-style:normal}
+.lgd li.sel button{font-weight:600}
+.w{fill:none;stroke-width:2.5;stroke-linecap:round;stroke-linejoin:round}
+.f{fill:none;stroke:var(--amb);stroke-width:3;stroke-linecap:round;stroke-dasharray:4 9;animation:fl .5s linear infinite;opacity:0}
+@keyframes fl{to{stroke-dashoffset:-13}}
+.blk{fill:var(--panel);stroke:var(--wire);stroke-width:2}
+#v2 text{font:500 12px var(--m);fill:var(--ink)}#v2 .net{fill:var(--muted);font-size:10px}#v2 .ttl{font:600 13px var(--f)}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr)}}
+@media (prefers-reduced-motion:reduce){.tr,.tr::after{transition:none}.f{animation:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header><h1>ARPCS circuit</h1><p class="sub">Arduino reads plant height, then sweeps the nozzle and sprays herbicide or growth regulator past 0.60 m.</p></header>
+<div class="st">
+  <div class="bar2">
+    <div class="seg" id="vw"><button data-v="3d" aria-pressed="true">3D</button><button data-v="2d" aria-pressed="false">2D</button></div>
+    <button class="btn" id="rv">Overview</button>
+  </div>
+  <div class="stage">
+    <div id="v3"></div>
+    <div id="v2" hidden><svg viewBox="0 0 760 500" role="img" aria-label="ARPCS circuit schematic" id="sv"></svg></div>
+    <div class="hint" id="hint">Drag to rotate, scroll to zoom, click a part to focus</div>
+  </div>
+  <div class="card info" id="info"></div>
+</div>
+<div class="ct">
+  <div class="card">
+    <h2>Controls</h2>
+    <label class="sw"><input type="checkbox" id="pw" checked><span class="tr"></span><span class="n">Battery switch<small>3.7 V line to servo and pump</small></span></label>
+    <label class="sw"><input type="checkbox" id="nm"><span class="tr"></span><span class="n">Jumper wires hidden<small>3D view</small></span></label>
+    <div class="sl" style="margin-top:8px"><label for="hs">Plant height <output id="hso">70 cm</output></label><input type="range" id="hs" min="10" max="120" step="1" value="70"></div>
+  </div>
+  <div class="card">
+    <h2>Readings</h2>
+    <div class="rd">
+      <span>Sensor distance</span><b id="r1">--</b>
+      <span>Plant height</span><b id="r2">--</b>
+      <span>Limit (DPWH)</span><b>60 cm</b>
+      <span>Servo angle</span><b id="r3">--</b>
+      <span>Relay (D8, active LOW)</span><b id="r4">--</b>
+      <span>Pump</span><b id="r5">--</b>
+      <span>Battery rail</span><b id="r6">--</b>
+    </div>
+  </div>
+  <div class="card"><h2>Parts</h2><ul class="lgd" id="lgd"></ul></div>
+</div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const $=s=>document.querySelector(s),T=THREE,V=(x,y,z)=>new T.Vector3(x,y,z);
+const S={pw:true,h:70,ang:90,t:0,over:false,pump:false,view:'3d'};
+const PARTS=[
+['ard','Arduino Uno','Powered by the USB cable. Gives 5 V to the sensor and relay coil. D7 TRIG, D6 ECHO, D8 relay IN, D9 servo signal.',V(-14,1,5)],
+['hc','HC-SR04 ultrasonic','Mounted above the plant, facing down. Distance = mount height minus plant height. Closer than 60 cm means overgrown.',V(-8,14,-20)],
+['srv','180° servo','Runs from the 3.7 V battery rail. Sweeps the nozzle from 0° to 180° while spraying.',V(-8,2,-8)],
+['rly','Relay module','Coil is driven by Arduino D8 with 5 V. The contacts COM and NO close the pump loop on the battery.',V(-1,1,-1)],
+['pmp','Submersible pump','3.7 V pump inside the herbicide or growth-regulator tank. Runs only when the relay is closed and the switch is on.',V(12,3,-2)],
+['tub','1 m tube and nozzle','Carries the liquid from the pump to the spray nozzle on the servo horn.',V(2,6,-6)],
+['bat','3.7 V 2500 mAh battery','Powers the servo and the pump. Its negative joins the Arduino GND so the signals share a ground.',V(12,1,9)],
+['sw','Switch','Cuts the battery positive line. Off means the servo and pump are dead, even if the relay is on.',V(6,1,2)],
+['bb','Breadboard','Holds the battery positive rail and the common GND rail for all parts.',V(1,1,8)]
+];
+const info=(i)=>{const p=PARTS[i];$('#info').innerHTML=p?`<b>${p[1]}</b><p>${p[2]}</p>`:`<b>How it works</b><p>The HC-SR04 measures down to the plant. At 60 cm or taller, the Arduino pulls D8 LOW, the relay closes, the pump sprays, and the servo sweeps the nozzle.</p>`};
+$('#lgd').innerHTML=PARTS.map((p,i)=>`<li data-i="${i}"><button><i>${i+1}</i>${p[1]}</button></li>`).join('');
+/* ---------- 3D ---------- */
+const sc=new T.Scene(),cam=new T.PerspectiveCamera(40,1,.1,500),rd=new T.WebGLRenderer({antialias:true,alpha:true});
+rd.setPixelRatio(Math.min(Math.max(devicePixelRatio,2),3));rd.shadowMap.enabled=true;rd.shadowMap.type=T.PCFSoftShadowMap;rd.toneMapping=T.ACESFilmicToneMapping;rd.toneMappingExposure=1.15;$('#v3').appendChild(rd.domElement);
+sc.add(new T.HemisphereLight(0xffffff,0x778877,.75));const dl=new T.DirectionalLight(0xffffff,1.05);dl.position.set(22,45,28);dl.castShadow=true;dl.shadow.mapSize.set(2048,2048);Object.assign(dl.shadow.camera,{left:-45,right:45,top:45,bottom:-45,near:1,far:140});dl.shadow.bias=-.0004;dl.shadow.radius=3;sc.add(dl);const fl=new T.DirectionalLight(0xbfd8ff,.35);fl.position.set(-30,20,-10);sc.add(fl);
+let th=.55,ph=1.0,rad=62,tg=V(-1,3,-3),tgo=tg.clone(),rado=62,goal=null;
+const setCam=()=>{cam.position.set(tg.x+rad*Math.sin(ph)*Math.sin(th),tg.y+rad*Math.cos(ph),tg.z+rad*Math.sin(ph)*Math.cos(th));cam.lookAt(tg)};
+const M=(c,o)=>new T.MeshStandardMaterial(Object.assign({color:c,roughness:.55,metalness:.1},o||{}));
+const ctex=(w,h,fn)=>{const c=document.createElement('canvas');c.width=w;c.height=h;fn(c.getContext('2d'),w,h);const t=new T.CanvasTexture(c);t.anisotropy=rd.capabilities.getMaxAnisotropy();return t};
+const lab=(w,h,x,y,z,p,tex)=>{const m=new T.Mesh(new T.PlaneGeometry(w,h),new T.MeshStandardMaterial({map:tex,roughness:.6,metalness:.05}));m.rotation.x=-Math.PI/2;m.position.set(x,y,z);p.add(m);return m};
+const grp=(id,x,y,z)=>{const g=new T.Group();g.position.set(x,y,z);g.userData.id=id;sc.add(g);return g};
+const box=(w,h,d,c,x,y,z,p,o)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),M(c,o));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(p||sc).add(m);return m};
+const cyl=(r,h,c,x,y,z,p,o)=>{const m=new T.Mesh(new T.CylinderGeometry(r,r,h,48),M(c,o));m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;(p||sc).add(m);return m};
+const table=box(48,.4,40,0xd8dfd5,-1,-.2,-6);table.material.transparent=true;table.material.opacity=.55;
+/* Arduino 0 */
+let g=grp(0,-14,.5,5);box(6.9,.3,5.3,0x0b6e8a,0,0,0,g);lab(6.9,5.3,0,.16,0,g,ctex(690,530,(c,w,h)=>{c.fillStyle='#0b6e8a';c.fillRect(0,0,w,h);c.strokeStyle='#cfe';c.lineWidth=3;c.strokeRect(14,14,w-28,h-28);c.fillStyle='#fff';c.font='bold 54px sans-serif';c.fillText('ARDUINO',200,250);c.font='34px sans-serif';c.fillText('UNO',420,300)}));box(1.8,1,1.6,0xc0c4c8,-3.2,.6,-.4,g);box(2.4,.5,.8,0x15191c,.5,.4,0,g);
+box(5.6,.6,.35,0x15191c,0,.45,-2.4,g);box(5.6,.6,.35,0x15191c,0,.45,2.4,g);box(.6,.4,.6,0xcc3333,-2.4,.3,1.5,g);box(.3,.2,.3,0x33ff66,2.6,.25,.8,g,{emissive:0x22aa44});
+/* HC-SR04 1 (on pole, faces down) */
+const pole=cyl(.3,16,0x8a8f94,-8,8,-23.4);g=grp(1,-8,16,-21.6);const hs=new T.Group();hs.rotation.x=Math.PI/2;g.add(hs);
+box(4.5,2,.2,0x1f5fbf,0,0,0,hs);[-1.2,1.2].forEach(x=>{const c=cyl(.8,.9,0xc0c4c8,x,0,.5,hs);c.rotation.x=Math.PI/2});box(3.2,.5,.15,0x15191c,0,.8,-.15,hs);
+/* beam */
+const beam=new T.Mesh(new T.ConeGeometry(2.2,15.5,48,1,true),M(0xffb020,{transparent:true,opacity:.18,side:T.DoubleSide}));beam.position.set(-8,8,-21.6);beam.rotation.x=Math.PI;sc.add(beam);
+/* plant */
+const plant=new T.Group();plant.position.set(-8,0,-20);sc.add(plant);const blades=[];
+for(let i=0;i<22;i++){const m=new T.Mesh(new T.ConeGeometry(.5,1,8),M(0x3aa04e));const a=i*2.4,r=.6+(i%5)*.55;m.position.set(Math.cos(a)*r,0,Math.sin(a)*r);m.userData.k=.7+(i%4)*.12;plant.add(m);blades.push(m)}
+/* Servo 2 */
+g=grp(2,-8,0,-8);box(2.4,2.2,1.2,0x2c6bd6,0,1.1,0,g);box(.8,.8,.6,0x2c6bd6,-1.5,1.9,0,g);const horn=new T.Group();horn.position.y=2.5;g.add(horn);
+cyl(.5,.3,0xeeeeee,0,0,0,horn);box(3,.2,.5,0xeeeeee,1.2,0,0,horn);const nz=new T.Mesh(new T.ConeGeometry(.35,1,24),M(0xe6b800));nz.rotation.z=-Math.PI/2;nz.position.set(2.8,.2,0);horn.add(nz);
+const tip=new T.Object3D();tip.position.set(3.4,.2,0);horn.add(tip);
+/* Relay 3 */
+g=grp(3,-1,.5,-1);box(5,.3,3.4,0x1a5fb4,0,0,0,g);box(2.2,1.6,1.8,0x2255cc,-.3,.9,0,g);lab(5,3.4,0,.17,0,g,ctex(500,340,(c,w,h)=>{c.fillStyle='#1a5fb4';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='bold 40px sans-serif';c.fillText('5V RELAY',140,310)}));const led=box(.4,.3,.4,0x552222,1.6,.35,1.2,g,{emissive:0x000000});
+[-1,0,1].forEach(z=>{box(.9,.8,.7,0x2aa84a,2.1,.6,z,g);box(.9,.5,.5,0x15191c,-2.1,.45,z,g)});
+/* Pump + tank 4 */
+g=grp(4,12,0,-2);const tank=box(8,6,6,0xcfe6f2,0,3,0,g,{transparent:true,opacity:.22});box(7.6,4,5.6,0xb6e04a,0,2.1,0,g,{transparent:true,opacity:.55});
+const pm=cyl(1.2,2.6,0x444a50,0,1.2,0,g);pm.rotation.z=Math.PI/2;cyl(.35,1.4,0x888888,1.8,1.8,0,g);box(8.2,.3,6.2,0x9aa3a8,0,6.1,0,g);
+/* Tube 5 */
+const tc=new T.CatmullRomCurve3([V(13.8,3,-2),V(13.8,8,-2),V(6,9,-5),V(-3,7,-8),V(-7,4,-8)]);
+g=grp(5,0,0,0);g.add(new T.Mesh(new T.TubeGeometry(tc,100,.3,16),M(0xdde8ee,{transparent:true,opacity:.7})));
+const tubeId=g;
+/* Battery 6 */
+g=grp(6,12,.9,9);box(4,1.8,7,0x4a5560,0,0,0,g);box(4.1,.6,4,0x2d8a4b,0,.3,0,g);lab(4,4,0,.92,0,g,ctex(400,400,(c,w,h)=>{c.fillStyle='#2d8a4b';c.fillRect(0,0,w,h);c.fillStyle='#fff';c.font='bold 62px sans-serif';c.save();c.translate(200,200);c.rotate(-Math.PI/2);c.textAlign='center';c.fillText('3.7V Li-ion',0,-20);c.font='44px sans-serif';c.fillText('2500 mAh',0,50);c.restore()}));
+/* Switch 7 */
+g=grp(7,6,.4,2);box(3,.8,2,0x222222,0,0,0,g);const lev=box(.4,1.6,.5,0xdd3333,0,.9,0,g);lev.geometry.translate(0,.5,0);
+/* Breadboard 8 */
+g=grp(8,1,.4,8.5);box(16,.8,5.4,0xeeeeee,0,0,0,g);lab(16,5.4,0,.41,0,g,ctex(1600,540,(c,w,h)=>{c.fillStyle='#f2f2ee';c.fillRect(0,0,w,h);c.fillStyle='#3a3a3a';for(let i=0;i<60;i++){const x=40+i*25;[40,75,490,455].forEach(y=>{c.fillRect(x,y,12,12)});for(let j=0;j<10;j++){if(j===5)continue;c.fillRect(x,130+j*32+(j>5?40:0),12,12)}}c.fillStyle='#d33';c.fillRect(30,100,1540,5);c.fillStyle='#25c';c.fillRect(30,430,1540,5)}));box(15,.05,.3,0xcc3333,0,.45,2.2,g);box(15,.05,.3,0x2255cc,0,.45,-2.2,g);
+/* wires */
+const A={bP:V(11,1.9,6),bN:V(13,1.9,6),sI:V(5,1.3,2),sO:V(7,1.3,2),rC:V(1.6,1.3,-2.5),rN:V(1.6,1.3,-1),rI:V(-3.2,1.1,-2.5),rV:V(-3.2,1.1,-1),rG:V(-3.2,1.1,0),
+pP:V(10,6.4,-3),pN:V(10,6.4,-1),gb:V(5,1,6.4),pb:V(5,1,10.6),a5:V(-12,1.8,7.4),ag:V(-11,1.8,7.4),d6:V(-13,1.8,2.7),d7:V(-12,1.8,2.7),d8:V(-11,1.8,2.7),d9:V(-10,1.8,2.7),
+sV:V(-8,1.2,-6.9),sS:V(-8.6,1.2,-6.9),sG:V(-7.4,1.2,-6.9),hV:V(-9.4,16,-20.4),hT:V(-8.5,16,-20.4),hE:V(-7.6,16,-20.4),hG:V(-6.7,16,-20.4)};
+const WR=[['bP','sI',0xdd3333,2],['sO','rC',0xdd3333,4],['rN','pP',0xe08a00,4],['pN','gb',0x222222,3],['bN','gb',0x222222,2],['ag','gb',0x222222,3],['sO','pb',0xdd3333,3],['sV','pb',0xdd3333,4],['sG','gb',0x222222,3],['sS','d9',0xe6c800,6],['a5','rV',0xdd3333,5],['rG','gb',0x222222,3],['d8','rI',0x2aa84a,4],['hV','a5',0xdd3333,6],['hG','gb',0x222222,6],['hT','d7',0x2255cc,5],['hE','d6',0x9933cc,7]];
+const wg=new T.Group();sc.add(wg);
+WR.forEach(([a,b,c,l])=>{const p=A[a],q=A[b],m=p.clone().add(q).multiplyScalar(.5);m.y+=l;const w=new T.Mesh(new T.TubeGeometry(new T.CatmullRomCurve3([p,m,q]),48,.14,12),M(c,{roughness:.35}));w.castShadow=true;wg.add(w)});
+/* spray particles */
+const N=140,pos=new Float32Array(N*3),vel=[],life=new Float32Array(N);for(let i=0;i<N;i++){pos[i*3+1]=-99;vel.push(V(0,0,0))}
+const pg=new T.BufferGeometry();pg.setAttribute('position',new T.BufferAttribute(pos,3));
+const pts=new T.Points(pg,new T.PointsMaterial({color:0xb4f04a,size:1.1,map:ctex(64,64,(c)=>{const g=c.createRadialGradient(32,32,2,32,32,30);g.addColorStop(0,'#fff');g.addColorStop(.6,'#fff');g.addColorStop(1,'rgba(255,255,255,0)');c.fillStyle=g;c.fillRect(0,0,64,64)}),transparent:true,depthWrite:false,alphaTest:.05}));pts.frustumCulled=false;sc.add(pts);let pi=0;
+/* camera input */
+const el=rd.domElement;let dr=null,moved=0;
+el.addEventListener('pointerdown',e=>{dr={x:e.clientX,y:e.clientY};moved=0;goal=null;el.setPointerCapture(e.pointerId)});
+el.addEventListener('pointermove',e=>{if(!dr)return;const dx=e.clientX-dr.x,dy=e.clientY-dr.y;moved+=Math.abs(dx)+Math.abs(dy);dr={x:e.clientX,y:e.clientY};th-=dx*.008;ph=Math.min(1.5,Math.max(.15,ph-dy*.008))});
+el.addEventListener('pointerup',e=>{dr=null;if(moved<5)pick(e)});
+el.addEventListener('wheel',e=>{e.preventDefault();rad=Math.min(130,Math.max(15,rad*(1+Math.sign(e.deltaY)*.08)))},{passive:false});
+const rc=new T.Raycaster();
+function pick(e){const r=el.getBoundingClientRect();rc.setFromCamera({x:(e.clientX-r.left)/r.width*2-1,y:-((e.clientY-r.top)/r.height)*2+1},cam);
+ const h=rc.intersectObjects(sc.children.filter(o=>o.userData.id!==undefined),true)[0];if(!h)return;let o=h.object;while(o&&o.userData.id===undefined)o=o.parent;sel(o.userData.id,1)}
+function sel(i,fly){info(i);document.querySelectorAll('.lgd li').forEach(l=>l.classList.toggle('sel',+l.dataset.i===i));if(fly){goal=PARTS[i][3].clone();rado=24}}
+$('#lgd').addEventListener('click',e=>{const l=e.target.closest('li');if(l){sel(+l.dataset.i,1);if(S.view!=='3d')setView('3d')}});
+$('#rv').onclick=()=>{goal=tgo.clone();rado=62;th=.55;ph=1;info();document.querySelectorAll('.lgd li').forEach(l=>l.classList.remove('sel'));if(S.view!=='3d')setView('3d')};
+function fit(){const s=$('.stage');const w=s.clientWidth,h=s.clientHeight;if(!w||!h)return;rd.setSize(w,h);cam.aspect=w/h;cam.updateProjectionMatrix()}
+new ResizeObserver(fit).observe($('.stage'));
+/* ---------- 2D ---------- */
+const WS=[
+['M180 265L250 265L250 118L385 118L385 100',0x2255cc,'a'],['M180 240L235 240L235 135L420 135L420 100',0x9933cc,'a'],
+['M180 290L300 290L300 240L330 240',0x2aa84a,'o'],['M180 315L215 315L215 15L630 15L630 30',0xe6c800,'m'],
+['M470 420L520 420L520 390',0xdd3333,'p'],['M520 360L520 300L470 300',0xdd3333,'p'],['M520 360L740 360L740 120L590 120L590 100',0xdd3333,'p'],['M470 240L590 240',0xe08a00,'u']];
+const bx=(x,y,w,h,t,s)=>`<rect class="blk" x="${x}" y="${y}" width="${w}" height="${h}" rx="8"/><text class="ttl" x="${x+w/2}" y="${y+21}" text-anchor="middle">${t}</text>${s?`<text class="net" x="${x+w/2}" y="${y+37}" text-anchor="middle">${s}</text>`:''}`;
+const tx=(x,y,t,a)=>`<text x="${x}" y="${y}" text-anchor="${a||'start'}" style="font-size:11px">${t}</text>`;
+let h2='';
+WS.forEach((w,i)=>{h2+=`<path class="w" d="${w[0]}" style="stroke:#${w[1].toString(16).padStart(6,'0')}"/><path class="f" id="fw${i}" d="${w[0]}"/>`});
+h2+=bx(30,120,150,260,'Arduino Uno','USB powered')+tx(24,254,'USB 5V','end')+tx(170,164,'5V','end')+tx(170,194,'GND','end')+tx(170,244,'D6','end')+tx(170,269,'D7','end')+tx(170,294,'D8','end')+tx(170,319,'D9','end')
++tx(40,345,'5V and GND go to the sensor,','start')+tx(40,359,'relay coil and the GND rail','start')
++bx(330,30,140,70,'HC-SR04','VCC 5V / GND')+tx(385,92,'TRIG','middle')+tx(420,92,'ECHO','middle')
++bx(560,30,140,70,'Servo 180°','V from battery')+tx(630,56,'SIG','middle')
++bx(330,200,140,130,'Relay module','coil 5V / GND from Arduino')+tx(336,244,'IN')+tx(336,269,'VCC')+tx(336,294,'GND')+tx(464,244,'NO','end')+tx(464,304,'COM','end')+'<text id="t1" x="400" y="320" text-anchor="middle" style="font-size:11px"></text>'
++bx(590,200,130,100,'Pump 3.7 V','in herbicide tank')+tx(596,244,'+')+tx(596,284,'-')+'<path class="w" d="M590 280L570 280" style="stroke:var(--wire)"/>'+tx(566,284,'GND','end')+'<text id="t2" x="655" y="294" text-anchor="middle" style="font-size:11px"></text>'
++bx(330,400,140,70,'Battery','3.7 V 2500 mAh')+tx(464,424,'+','end')+tx(464,454,'-','end')+'<path class="w" d="M470 450L500 450" style="stroke:var(--wire)"/>'+tx(504,454,'GND')
++'<circle cx="520" cy="390" r="4" class="blk"/><circle cx="520" cy="360" r="4" class="blk"/><path id="lv" class="w" style="stroke:var(--wire)"/>'+tx(534,380,'Switch')
++'<path class="w" d="M590 100L590 112" style="stroke:var(--wire)"/>'+tx(615,148,'Common GND: Arduino, battery, pump,','start')+tx(615,162,'servo, sensor and relay','start');
+$('#sv').innerHTML=h2;
+/* ---------- state ---------- */
+function setView(v){S.view=v;$('#v3').hidden=v!=='3d';$('#v2').hidden=v!=='2d';$('#hint').hidden=v!=='3d';document.querySelectorAll('#vw button').forEach(b=>b.setAttribute('aria-pressed',b.dataset.v===v));if(v==='3d')fit()}
+$('#vw').onclick=e=>{const b=e.target.closest('button');if(b)setView(b.dataset.v)};
+$('#pw').onchange=e=>S.pw=e.target.checked;$('#nm').onchange=e=>wg.visible=!e.target.checked;
+$('#hs').oninput=e=>{S.h=+e.target.value;$('#hso').textContent=S.h+' cm'};
+const pr=(id,on,a,b)=>{const e=$(id);e.textContent=on?a:b;e.className=on?'on':'off'};
+let last=performance.now();
+function loop(now){const dt=Math.min(.05,(now-last)/1000);last=now;
+ S.over=S.h>=60;S.pump=S.pw&&S.over;
+ if(S.pw){if(S.over){S.t+=dt;S.ang=90+90*Math.sin(S.t*1.7)}else S.ang+=(90-S.ang)*Math.min(1,dt*3)}
+ horn.rotation.y=S.ang*Math.PI/180;
+ lev.rotation.z=S.pw?0:.6;led.material.emissive.setHex(S.over?0xff2222:0x000000);led.material.color.setHex(S.over?0xff4444:0x552222);
+ const hh=S.h/7.5;blades.forEach(b=>{b.scale.y=hh*b.userData.k;b.position.y=b.scale.y/2;b.material.color.setHex(S.over?0xb8a22e:0x3aa04e)});
+ beam.visible=true;beam.material.opacity=.14+.06*Math.sin(now/120);
+ /* particles */
+ if(S.pump){const p=new T.Vector3();tip.getWorldPosition(p);const d=V(Math.cos(S.ang*Math.PI/180),0,-Math.sin(S.ang*Math.PI/180));
+  for(let k=0;k<3;k++){pos[pi*3]=p.x;pos[pi*3+1]=p.y;pos[pi*3+2]=p.z;vel[pi].set(d.x*12+(Math.random()-.5),4.5+Math.random(),d.z*12+(Math.random()-.5));life[pi]=1;pi=(pi+1)%N}}
+ for(let i=0;i<N;i++){if(life[i]<=0)continue;vel[i].y-=9*dt;pos[i*3]+=vel[i].x*dt;pos[i*3+1]+=vel[i].y*dt;pos[i*3+2]+=vel[i].z*dt;if(pos[i*3+1]<0){life[i]=0;pos[i*3+1]=-99}}
+ pg.attributes.position.needsUpdate=true;
+ /* readings */
+ $('#r1').textContent=(120-S.h)+' cm';$('#r2').textContent=S.h+' cm';$('#r3').textContent=Math.round(S.ang)+'°';
+ pr('#r4',S.over,'ON (LOW)','OFF (HIGH)');pr('#r5',S.pump,'Spraying','Off');$('#r6').textContent=S.pw?'3.7 V':'0 V';$('#r6').className=S.pw?'on':'off';
+ /* 2D */
+ const on={a:1,o:S.over,m:S.pw&&S.over,p:S.pw,u:S.pump};WS.forEach((w,i)=>$('#fw'+i).style.opacity=on[w[2]]?1:0);
+ $('#lv').setAttribute('d',S.pw?'M520 390L520 360':'M520 390L538 366');
+ $('#t1').textContent=S.over?'Closed (spraying)':'Open';$('#t2').textContent=S.pump?'Running':'Stopped';
+ if(S.view==='3d'){if(goal){tg.lerp(goal,.08);rad+=(rado-rad)*.08}setCam();rd.render(sc,cam)}
+ requestAnimationFrame(loop)}
+info();fit();setCam();requestAnimationFrame(loop);
+</script>
+</body>
+</html>
